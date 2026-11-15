@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
-import { Compass, Sparkles, MapPin, ArrowRight, Train, Clock, ShieldCheck } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Compass, Sparkles, MapPin, ArrowRight, Train, Clock, ShieldCheck, Flame, Mountain, Landmark } from "lucide-react";
 
 export interface Destination {
   id: string;
   title: string;
   subtitle: string;
   location: string;
+  category: "HERITAGE" | "SPIRITUAL" | "HIMALAYAN" | "COASTAL";
   fromCluster: string;
   toCluster: string;
   fromName: string;
@@ -27,6 +28,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Taj Mahal & Agra Fort",
     subtitle: "The Monument of Eternal Love",
     location: "Agra, Uttar Pradesh",
+    category: "HERITAGE",
     fromCluster: "DELHI",
     toCluster: "AGC",
     fromName: "New Delhi / Nizamuddin",
@@ -44,6 +46,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Varanasi & Dashashwamedh Ghat",
     subtitle: "The Spiritual Capital of India",
     location: "Varanasi, Uttar Pradesh",
+    category: "SPIRITUAL",
     fromCluster: "DELHI",
     toCluster: "VARANASI",
     fromName: "New Delhi (NDLS)",
@@ -61,6 +64,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Hawa Mahal & Amber Palace",
     subtitle: "The Royal Pink City",
     location: "Jaipur, Rajasthan",
+    category: "HERITAGE",
     fromCluster: "DELHI",
     toCluster: "JP",
     fromName: "Delhi Cantt / Sarai Rohilla",
@@ -78,6 +82,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Vaishno Devi & Kashmir Gateway",
     subtitle: "Pristine Shivalik Foothills",
     location: "Katra, Jammu & Kashmir",
+    category: "HIMALAYAN",
     fromCluster: "DELHI",
     toCluster: "SVDK",
     fromName: "New Delhi (NDLS)",
@@ -95,6 +100,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Goa & Konkan Coastal Rail",
     subtitle: "Tropical Beaches & Portuguese Architecture",
     location: "Madgaon / Vasco, Goa",
+    category: "COASTAL",
     fromCluster: "MUMBAI",
     toCluster: "GOA",
     fromName: "CSMT / Panvel",
@@ -112,6 +118,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Kerala Backwaters & Fort Kochi",
     subtitle: "God's Own Country",
     location: "Kochi & Alleppey, Kerala",
+    category: "COASTAL",
     fromCluster: "BENGALURU",
     toCluster: "KOCHI",
     fromName: "SMVT Bengaluru",
@@ -129,6 +136,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Golden Temple & Wagah Border",
     subtitle: "The Spiritual Sanctum of Punjab",
     location: "Amritsar, Punjab",
+    category: "SPIRITUAL",
     fromCluster: "DELHI",
     toCluster: "ASR",
     fromName: "Delhi Old (DLI) / NDLS",
@@ -146,6 +154,7 @@ export const FAMOUS_DESTINATIONS: Destination[] = [
     title: "Mumbai Financial Capital & Marine Drive",
     subtitle: "The City of Dreams",
     location: "Mumbai, Maharashtra",
+    category: "HERITAGE",
     fromCluster: "DELHI",
     toCluster: "MUMBAI",
     fromName: "New Delhi (NDLS)",
@@ -165,6 +174,13 @@ interface FamousDestinationsProps {
 }
 
 export function FamousDestinations({ onSelectDestination }: FamousDestinationsProps) {
+  const [selectedFilter, setSelectedFilter] = useState<"ALL" | "HERITAGE" | "SPIRITUAL" | "HIMALAYAN" | "COASTAL">("ALL");
+
+  const filteredDestinations = useMemo(() => {
+    if (selectedFilter === "ALL") return FAMOUS_DESTINATIONS;
+    return FAMOUS_DESTINATIONS.filter((d) => d.category === selectedFilter);
+  }, [selectedFilter]);
+
   return (
     <section className="relative mt-16 overflow-hidden">
       {/* Background ambient lighting */}
@@ -174,7 +190,7 @@ export function FamousDestinations({ onSelectDestination }: FamousDestinationsPr
       {/* Section Header */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/40 px-3 py-1 text-xs font-semibold text-red-300 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/40 px-3.5 py-1 text-xs font-semibold text-red-300 backdrop-blur-md">
             <Compass className="h-3.5 w-3.5 text-red-400" />
             <span>Curated Rail Expeditions</span>
           </div>
@@ -182,32 +198,86 @@ export function FamousDestinations({ onSelectDestination }: FamousDestinationsPr
             Explore India by Rail
           </h2>
           <p className="mt-2 text-sm text-slate-400 max-w-2xl leading-relaxed">
-            Click any iconic Indian landmark to instantly discover direct high-speed trains, scenic multi-hop junctions, and confirmed seat hacks.
+            Click any iconic landmark to instantly discover direct high-speed trains, scenic multi-hop junctions, and confirmed seat hacks.
           </p>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
-          <span>Real-time Indian Railways Timetables</span>
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+          <button
+            type="button"
+            onClick={() => setSelectedFilter("ALL")}
+            className={`rounded-xl px-3 py-1.5 font-bold transition-all cursor-pointer ${
+              selectedFilter === "ALL"
+                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                : "bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
+            }`}
+          >
+            All ({FAMOUS_DESTINATIONS.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedFilter("HERITAGE")}
+            className={`rounded-xl px-3 py-1.5 font-bold transition-all cursor-pointer ${
+              selectedFilter === "HERITAGE"
+                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                : "bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
+            }`}
+          >
+            Heritage &amp; Forts
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedFilter("SPIRITUAL")}
+            className={`rounded-xl px-3 py-1.5 font-bold transition-all cursor-pointer ${
+              selectedFilter === "SPIRITUAL"
+                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                : "bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
+            }`}
+          >
+            Spiritual
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedFilter("HIMALAYAN")}
+            className={`rounded-xl px-3 py-1.5 font-bold transition-all cursor-pointer ${
+              selectedFilter === "HIMALAYAN"
+                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                : "bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
+            }`}
+          >
+            Himalayas
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedFilter("COASTAL")}
+            className={`rounded-xl px-3 py-1.5 font-bold transition-all cursor-pointer ${
+              selectedFilter === "COASTAL"
+                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                : "bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
+            }`}
+          >
+            Coastal
+          </button>
         </div>
       </div>
 
       {/* Destination Grid */}
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {FAMOUS_DESTINATIONS.map((dest) => (
+        {filteredDestinations.map((dest) => (
           <div
             key={dest.id}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-red-500/50 hover:shadow-2xl hover:shadow-red-600/15"
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-red-500/50 hover:shadow-2xl hover:shadow-red-600/15"
           >
             {/* Image Container with Zoom Effect */}
             <div className="relative h-48 w-full overflow-hidden bg-slate-950">
               <img
                 src={dest.imageUrl}
                 alt={dest.title}
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
               {/* Tag Badge */}
               <div className="absolute top-3 left-3">
@@ -220,11 +290,11 @@ export function FamousDestinations({ onSelectDestination }: FamousDestinationsPr
 
               {/* Location Tag */}
               <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-slate-200">
-                <div className="flex items-center gap-1 font-medium">
+                <div className="flex items-center gap-1 font-semibold">
                   <MapPin className="h-3.5 w-3.5 text-red-400 shrink-0" />
                   <span className="truncate">{dest.location}</span>
                 </div>
-                <div className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[11px] font-semibold text-slate-300 backdrop-blur-sm">
+                <div className="flex items-center gap-1 rounded-lg bg-black/70 px-2 py-0.5 text-[11px] font-bold text-amber-300 backdrop-blur-sm border border-white/10">
                   <Clock className="h-3 w-3 text-amber-400" />
                   <span>{dest.durationApprox}</span>
                 </div>
@@ -256,11 +326,11 @@ export function FamousDestinations({ onSelectDestination }: FamousDestinationsPr
               </div>
 
               {/* 1-Click Action Button */}
-              <div className="mt-5 border-t border-slate-800/80 pt-3">
+              <div className="mt-5 border-t border-white/10 pt-3.5">
                 <button
                   type="button"
                   onClick={() => onSelectDestination(dest.fromCluster, dest.toCluster)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600/90 to-amber-600/90 px-3.5 py-2.5 text-xs font-bold text-white shadow-md shadow-red-950/40 transition-all hover:from-red-500 hover:to-amber-500 active:scale-95"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 px-3.5 py-2.5 text-xs font-black text-white shadow-md shadow-red-950/40 transition-all hover:scale-[1.02] hover:from-red-500 hover:to-amber-500 active:scale-95 cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber-200" />
                   <span>Search {dest.toName}</span>

@@ -1,12 +1,51 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Play, Pause, Volume2, VolumeX, Radio, Zap, Shield, Sparkles } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Radio, Zap, Shield, Sparkles, Gauge, Compass } from "lucide-react";
+
+interface TrainMode {
+  id: string;
+  name: string;
+  speed: string;
+  power: string;
+  safety: string;
+  accent: string;
+}
+
+const TRAIN_MODES: TrainMode[] = [
+  {
+    id: "vande-bharat",
+    name: "TRAIN 22436 • VANDE BHARAT 2.0",
+    speed: "160 km/h",
+    power: "25 kV AC 50Hz",
+    safety: "KAVACH 4.0 Active",
+    accent: "text-amber-400",
+  },
+  {
+    id: "rajdhani",
+    name: "TRAIN 12952 • MUMBAI RAJDHANI",
+    speed: "130 km/h",
+    power: "WAP-7 6000 HP",
+    safety: "TPWS Signal Guard",
+    accent: "text-red-400",
+  },
+  {
+    id: "bullet",
+    name: "MAHSR • SHINKANSEN BULLET",
+    speed: "320 km/h",
+    power: "25 kV AC High-Speed",
+    safety: "DS-ATC Fail-Safe",
+    accent: "text-emerald-400",
+  },
+];
 
 export function TrainVideoHero() {
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(true);
+  const [selectedTrainIdx, setSelectedTrainIdx] = useState<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const activeMode = TRAIN_MODES[selectedTrainIdx];
 
   function togglePlay() {
     if (videoRef.current) {
@@ -26,10 +65,14 @@ export function TrainVideoHero() {
     }
   }
 
+  function cycleTrainMode() {
+    setSelectedTrainIdx((prev) => (prev + 1) % TRAIN_MODES.length);
+  }
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl mb-8">
-      {/* 1. Background Video Layer */}
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-35 mix-blend-screen pointer-events-none">
+      {/* 1. Background Video Layer with Fallback Poster Gradient */}
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-35 mix-blend-screen pointer-events-none bg-gradient-to-br from-slate-950 via-slate-900 to-red-950">
         <video
           ref={videoRef}
           autoPlay
@@ -50,19 +93,28 @@ export function TrainVideoHero() {
         {/* Top Telemetry & Controls Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           {/* Live Telemetry Pill */}
-          <div className="flex items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-3.5 py-1.5 text-xs backdrop-blur-md">
+          <div className="flex items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-4 py-1.5 text-xs backdrop-blur-md shadow-lg">
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 badge-pulse" />
             <span className="font-mono font-bold text-emerald-300">LIVE IRCTC RADAR</span>
             <span className="text-emerald-500">•</span>
-            <span className="text-emerald-200">KAVACH Safety System Active</span>
+            <span className="text-emerald-200">{activeMode.safety}</span>
           </div>
 
-          {/* Video Controls */}
+          {/* Video & Telemetry Controls */}
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={cycleTrainMode}
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-slate-900/80 px-3 py-1.5 text-xs font-semibold text-slate-300 backdrop-blur-sm transition hover:bg-slate-800 hover:text-white"
+              title="Click to cycle train telemetry mode"
+            >
+              <Gauge className="h-3.5 w-3.5 text-amber-400" />
+              <span>Switch Train</span>
+            </button>
+            <button
+              type="button"
               onClick={togglePlay}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-slate-300 backdrop-blur-sm transition hover:bg-slate-800 hover:text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-slate-300 backdrop-blur-sm transition hover:bg-slate-800 hover:text-white cursor-pointer"
               title={isPlaying ? "Pause Video" : "Play Video"}
             >
               {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
@@ -70,7 +122,7 @@ export function TrainVideoHero() {
             <button
               type="button"
               onClick={toggleMute}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-slate-300 backdrop-blur-sm transition hover:bg-slate-800 hover:text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-slate-300 backdrop-blur-sm transition hover:bg-slate-800 hover:text-white cursor-pointer"
               title={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
@@ -80,7 +132,7 @@ export function TrainVideoHero() {
 
         {/* Hero Title & Value Proposition */}
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 mb-4 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-3.5 py-1 text-xs font-bold text-red-400 mb-4 backdrop-blur-sm shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             <span>Beat The 100+ Waiting List Trap</span>
           </div>
@@ -93,9 +145,9 @@ export function TrainVideoHero() {
             In India.
           </h1>
 
-          <p className="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-            When IRCTC says <strong className="text-red-400">“NO SEATS AVAILABLE”</strong>,{" "}
-            <strong className="text-white">Transit Navigator</strong> discovers confirmed berths on the same train via quota extensions, or connects you via high-speed transit hubs with full IRCTC refund protection.
+          <p className="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
+            When IRCTC says <strong className="text-red-400 font-bold">“NO SEATS AVAILABLE”</strong>,{" "}
+            <strong className="text-white font-bold">Transit Navigator</strong> discovers confirmed berths on the same train via quota extensions, or connects you via high-speed transit hubs with full IRCTC refund protection.
           </p>
         </div>
 
@@ -103,13 +155,13 @@ export function TrainVideoHero() {
         <div className="mt-10 pt-6 border-t border-white/10">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-mono">
             <div className="flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-amber-400" />
-              <span>TRAIN 22436 • VANDE BHARAT EXPRESS</span>
+              <Zap className={`h-3.5 w-3.5 ${activeMode.accent}`} />
+              <span className="font-bold text-slate-200">{activeMode.name}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-emerald-400 font-bold">160 km/h</span>
-              <span className="hidden sm:inline text-slate-500">|</span>
-              <span className="hidden sm:inline">25 kV AC 50Hz</span>
+              <span className="text-emerald-400 font-bold text-sm">{activeMode.speed}</span>
+              <span className="hidden sm:inline text-slate-600">|</span>
+              <span className="hidden sm:inline text-slate-300">{activeMode.power}</span>
             </div>
           </div>
 
@@ -121,11 +173,11 @@ export function TrainVideoHero() {
             <div className="absolute inset-x-0 bottom-3 h-0.5 bg-gradient-to-r from-slate-600 via-slate-400 to-slate-600 shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
             <div className="absolute inset-x-0 bottom-1 h-0.5 bg-gradient-to-r from-slate-600 via-slate-400 to-slate-600 shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
 
-            {/* Gliding High-Speed Train SVG */}
+            {/* Gliding High-Speed Train SVG (Valid Path Geometry) */}
             <div className="absolute bottom-2 left-0 w-80 train-glider pointer-events-none">
-              <svg viewBox="0 0 320 40" className="w-full h-auto drop-shadow-[0_4px_12px_rgba(239,68,68,0.5)]">
+              <svg viewBox="0 0 320 40" className="w-full h-auto drop-shadow-[0_4px_14px_rgba(239,68,68,0.5)]">
                 {/* Headlight Beam */}
-                <polygon points="310,24 350,15 350,33 310,24" fill="rgba(254,240,138,0.25)" />
+                <polygon points="310,24 350,15 350,33 310,24" fill="rgba(254,240,138,0.3)" />
                 {/* Aerodynamic Locomotive Body */}
                 <path
                   d="M10,28 L270,28 Q300,28 315,22 Q320,16 300,10 L270,8 L10,8 Z"
@@ -133,8 +185,8 @@ export function TrainVideoHero() {
                   stroke="#cbd5e1"
                   strokeWidth="1"
                 />
-                {/* Saffron & Navy Blue Vande Bharat Stripes */}
-                <path d="M10,13 L280,13 Q295,13 305,17 L300,19 Q290,15 L10,15 Z" fill="#0284c7" />
+                {/* Saffron & Navy Blue Vande Bharat Stripes with Valid Geometry */}
+                <path d="M10,13 L280,13 Q295,13 305,17 L300,19 Q290,15 280,15 L10,15 Z" fill="#0284c7" />
                 <path d="M10,19 L295,19 Q305,21 310,23 L305,25 L10,25 Z" fill="#f97316" />
                 {/* Windshield */}
                 <path d="M285,11 L305,15 Q308,18 300,19 L280,15 Z" fill="#0f172a" />
